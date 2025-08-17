@@ -12,4 +12,12 @@ This is just a repo containing a demo website to run an example of the tool. Clo
 # Demo
 - See here for a running version of this demo: https://nvelop.co.uk/logical-expression-builder/
 
+# Screen shots
 
+This demo running in a browser:
+
+![Screenshot](https://github.com/nvelop/LogicalExpressionBuilder/blob/main/screenshot.jpg?raw=true)
+
+Another styling option:
+
+![Screenshot](https://github.com/nvelop/LogicalExpressionBuilder/blob/main/screenshot2.jpg?raw=true)
