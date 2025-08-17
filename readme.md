@@ -11,6 +11,7 @@
 - Available options presented by the tool adjusted depending on context to help reduce information overload for the end user
 - No limit of expression depth
 - Not limited to boolean outcomes like many predicate builders, outcome can be any type, making this useful for not only predicates but evaluating scoring or other algorithms
+- Dynamic validation of expression parameters
 
 # Server side interpreter
 - Could be tailored for other uses but currently built using DataTables, expressions evaluated by Column DataExpressions
