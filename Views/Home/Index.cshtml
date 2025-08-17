@@ -1,0 +1,290 @@
+﻿@using LogicalExpressionBuilder.BlockClientClasses
+@using Newtonsoft.Json;
+@using System.Data;
+
+@model  BlockClientPage
+
+@{
+    ViewBag.Title = "Blocks";
+
+    Newtonsoft.Json.Serialization.DefaultContractResolver contractResolver = new Newtonsoft.Json.Serialization.DefaultContractResolver
+    {
+        NamingStrategy = new Newtonsoft.Json.Serialization.CamelCaseNamingStrategy()
+    };
+}
+
+<style>
+    button {
+        margin: 5px 5px 5px 0;
+    }
+
+    body.dragging, body.dragging * {
+        cursor: move !important;
+    }
+
+    ul {
+        list-style: none;
+    }
+
+    li.logic {
+        display: inline;
+    }
+
+    fieldset {
+        display: block;
+    }
+
+    .dragged {
+        position: absolute;
+        opacity: 0.5;
+        z-index: 2000;
+    }
+
+    .selected {
+        border: solid 1px red;
+        background-color: #eee;
+    }
+
+    .output button {
+        position: relative;
+        /** More li styles **/
+    }
+
+        .output button:before {
+            position: absolute;
+            /** Define arrowhead **/
+        }
+
+    .outer {
+        border-radius: 3px;
+        padding: 2px;
+        width: 100%;
+        margin: 5px 0;
+        background-color: #ccc;
+    }
+
+
+
+    .template {
+        display: none;
+    }
+
+
+
+    .inner {
+        border-radius: 3px;
+        
+        display: block;
+    }
+
+        .inner .target {
+            border-radius: 3px;
+            padding: 1px 2px 5px 5px;
+            background-color: #fff;
+            min-height: 10px;
+            margin: 3px;
+        }
+
+    .title {
+        font-weight: bold;
+        margin: 0 3px;
+    }
+
+    .output .outer.inline {
+        display: inline-block;
+        width: auto;
+        margin: 5px 0 0 5px;
+    }
+
+        .output .outer.inline > .inner {
+            vertical-align: top;
+            display: table-cell;
+        }
+
+            .output .outer.inline > .inner > .title {
+                display: inline-block;
+                min-width: 100px;
+            }
+
+            .output .outer.inline > .inner > .target {
+                display: inline-block;
+                min-height: 10px;
+                min-width: 70px;
+            }
+
+    .output .outer.column, .output .outer.operator, .output .outer.option, .output .outer.condition, .output .outer.input {
+        background-color: #fff;
+        display: inline;
+    }
+
+        .output .outer.input input {
+            font-size: 0.8em;
+            border: none;
+            width: 80px;
+            margin-top: 2px;
+            padding: 0 3px;
+        }
+
+        .output .outer.input .inner {
+            background-color: #337ab7;
+            display: inline-block;
+            padding: 0px 3px 4px 3px;
+            margin: 3px 0 0 0;
+        }
+</style>
+<form method="post" novalidate>
+    <h1>Blocks logic Builder demo</h1>
+    <p>Questions and dimensions are pre-set in this case but could be dynamic driven from whichever data source you choose. Use the builder to put together complex multi-level logic. When "save to server" is clicked, the logic will be evaluated server side. Logic is exported to a reusable format and then evaluated. Can be styled as required. </p>
+    <p>Some questions have pre-loaded logic (F01 Score for example). Answers in this case are also pre-set.</p>
+    <p>Pick a question and (F01 to F04) and pick a dimension (score or enabled). </p>
+    <p>Experiment with many deep levels of grouping expressions</p>
+    <div class="row">
+        <div class="col-lg-2">
+            <select class="form-control" id="QuestionId" name="QuestionId">
+                <option>choose...</option>
+                @foreach (var opt in Model.Options.Single(x => x.Name == "Columns").Options.Where(x => x.Name.EndsWith("Answer")))
+                {
+                    <option value="@opt.Name.Replace("Answer","")" @(Request.Form["QuestionId"] == @opt.Name.Replace("Answer", "") ? "selected" : "")>@opt.Name.Replace("Answer", "")</option>
+                }
+            </select>
+        </div>
+        <div class="col-lg-2">
+            <select class="form-control " id="LogicType" name="LogicType">
+                <option>choose...</option>
+                <option value="Enabled" @(Request.Form["LogicType"] == "Enabled" ? "selected" : "")>Enabled</option>
+                <option value="Score" @(Request.Form["LogicType"] == "Score" ? "selected" : "")>Score</option>
+            </select>
+        </div>
+        <div class="col-lg-2">
+            <button class="btn btn-primary">Load Question</button>
+        </div>
+    </div>
+    <button class="export btn btn-primary" type="button">Export</button>
+    <button class="import btn btn-primary" type="button">Import</button>
+    <button class="btn btn-secondary reset" type="button">Reset</button>
+    <button class="btn btn-secondary clear" type="button">Clear</button>
+    <button class="btn btn-primary save-server" type="button">Save to Server</button>
+
+    <ul class="logicbuilder">
+        <!-- if template -->
+        <li class="outer if template" data-type="if">
+            <div class="inner">
+                <span class="title">
+                    IF <span class="remove text-default"><i class="fas fa-minus-circle "></i></span>
+                </span>
+                <ul class="target" data-default-text="[criteria]" data-type="criteria" data-allowed-options="['statement', 'expression', 'condition']">[criteria]</ul>
+            </div>
+            <div class="inner">
+                <span class="title">THEN</span>
+                <ul class="target" data-default-text="[result if true]" data-type="then" data-max-options="1" data-allowed-options="['statement', 'expression', 'condition', 'input', 'option']">[result if true]</ul>
+            </div>
+            <div class="inner">
+                <span class="title">ELSE</span>
+                <ul class="target" data-default-text="[result if false]" data-type="else" data-max-options="1" data-allowed-options="['statement', 'expression', 'condition', 'input', 'option']">[result if false]</ul>
+            </div>
+        </li>
+        <!-- end if template -->
+        <!-- group template -->
+        <li class="outer group template inline" data-type="group">
+            <div class="inner">
+                <span class="title">
+                    GROUP <span class="remove text-default"><i class="fas fa-minus-circle "></i></span>
+                </span>
+
+                <ul class="target" data-default-text="[condition]" data-type="condition" data-max-options="1" data-allowed-options="['condition']">[condition]</ul>
+            </div>
+            <div class="inner">
+                <ul class="target" data-default-text="[expression]" data-type="groupstatement" data-allowed-options="['statement']">[expression]</ul>
+            </div>
+
+        </li>
+        <!-- end group template -->
+        <!-- expression template -->
+        <li class="outer expression template inline" data-type="expression">
+            <div class="inner">
+                <span class="title">
+                    EXPRESSION <span class="remove text-default"><i class="fas fa-minus-circle "></i></span>
+                </span>
+                <ul class="target" data-default-text="[value]" data-type="left" data-max-options="1" data-allowed-options="['column','option','input']">[value]</ul>
+            </div>
+            <div class="inner">
+                <ul class="target" data-default-text="[operator]" data-type="operator" data-max-options="1" data-allowed-options="['operator:equals','operator:notequals','operator:greaterthan','operator:lessthan','operator:containsall','operator:notcontainsall','operator:notcontainsany','operator:containsany']">[operator]</ul>
+            </div>
+            <div class="inner">
+                <ul class="target" data-default-text="[value]" data-type="right" data-allowed-options="['column','option','input']">[value]</ul>
+            </div>
+        </li>
+        <!-- end expression template -->
+        <!-- multiplier template -->
+        <li class="outer mathsoperation template inline" data-type="mathsoperation">
+            <div class="inner">
+                <span class="title">
+                    MATHS OPERATION <span class="remove text-default"><i class="fas fa-minus-circle "></i></span>
+                </span>
+                <ul class="target" data-default-text="[value]" data-type="left" data-max-options="1" data-allowed-options="['column','option','input']">[value]</ul>
+            </div>
+            <div class="inner">
+                <ul class="target" data-default-text="[operator]" data-type="operator" data-max-options="1" data-allowed-options="['operator:plus','operator:minus','operator:multiply','operator:divide']">[operator]</ul>
+            </div>
+            <div class="inner">
+                <ul class="target" data-default-text="[value]" data-type="right" data-max-options="1" data-allowed-options="['column','option','input']">[value]</ul>
+            </div>
+        </li>
+        <!-- end expression template -->
+        <!-- column template -->
+        <li class="outer column template">
+            <button type="button" class="btn btn-success btn-xs" data-type="column">[] <span class="remove text-default"><i class="fas fa-minus-circle "></i></span></button>
+        </li>
+
+        <!-- operator template -->
+        <li class="outer operator template">
+            <button type="button" class="btn btn-warning btn-xs" data-type="operator">[] <span class="remove text-default"><i class="fas fa-minus-circle "></i></span></button>
+        </li>
+
+        <!-- condition template -->
+        <li class="outer condition template">
+            <button type="button" class="btn btn-danger btn-xs" data-type="condition">[] <span class="remove text-default"><i class="fas fa-minus-circle "></i></span></button>
+        </li>
+
+        <!-- option template -->
+        <li class="outer option template">
+            <button type="button" class="btn btn-info btn-xs" data-type="option">[] <span class="remove text-default"><i class="fas fa-minus-circle "></i></span></button>
+        </li>
+
+        <!-- input template -->
+        <li class="outer input template">
+            <span class="inner"><input type="text" class=" " data-type="input" /> <span class="remove text-default"><i class="fas fa-minus-circle "></i></span></span>
+        </li>
+
+    </ul>
+
+    <div class="row">
+        <div class="col-md-12">
+            <h2>Options</h2>
+
+            <div class="options">
+
+            </div>
+
+
+            <h2>Statement</h2>
+            <ul class="output target"></ul>
+
+            <h2>Data</h2>
+            <pre class="data-output"></pre>
+
+            <h2>Server response</h2>
+            <pre class="server-response"></pre>
+        </div>
+    </div>
+</form>
+
+
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+<script src="~/Scripts/BlockLogicClient.js"></script>
+<script>
+        blockLogicClient.config = JSON.parse('@Html.Raw(Newtonsoft.Json.JsonConvert.SerializeObject(Model, new JsonSerializerSettings{ContractResolver = contractResolver, NullValueHandling = NullValueHandling.Ignore}))');
+
+        blockLogicClient.init();
+</script>

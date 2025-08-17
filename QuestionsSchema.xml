@@ -1,0 +1,27 @@
+<?xml version="1.0" standalone="yes"?>
+<xs:schema id="NewDataSet" xmlns="" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:msdata="urn:schemas-microsoft-com:xml-msdata">
+  <xs:element name="NewDataSet" msdata:IsDataSet="true" msdata:MainDataTable="Table1" msdata:UseCurrentLocale="true">
+    <xs:complexType>
+      <xs:choice minOccurs="0" maxOccurs="unbounded">
+        <xs:element name="Table1">
+          <xs:complexType>
+            <xs:sequence>
+              <xs:element name="F01Answer" type="xs:int" minOccurs="0" />
+              <xs:element name="F01Score" msdata:ReadOnly="true" msdata:Expression="IIF((F01Enabled = 1 OR F04Answer = 1 OR F03Answer = 6 OR F04Answer = 3),F03Answer * 43,2)" type="xs:double" minOccurs="0" />
+              <xs:element name="F01Enabled" msdata:ReadOnly="true" msdata:Expression="IIF(F02Answer = 1,1,0)" type="xs:int" minOccurs="0" />
+              <xs:element name="F02Answer" type="xs:int" minOccurs="0" />
+              <xs:element name="F02Score" msdata:ReadOnly="true" type="xs:double" minOccurs="0" />
+              <xs:element name="F02Enabled" type="xs:int" minOccurs="0" />
+              <xs:element name="F03Answer" type="xs:int" minOccurs="0" />
+              <xs:element name="F03Score" type="xs:double" minOccurs="0" />
+              <xs:element name="F03Enabled" type="xs:int" minOccurs="0" />
+              <xs:element name="F04Answer" type="xs:int" minOccurs="0" />
+              <xs:element name="F04Score" type="xs:double" minOccurs="0" />
+              <xs:element name="F04Enabled" type="xs:int" minOccurs="0" />
+            </xs:sequence>
+          </xs:complexType>
+        </xs:element>
+      </xs:choice>
+    </xs:complexType>
+  </xs:element>
+</xs:schema>
