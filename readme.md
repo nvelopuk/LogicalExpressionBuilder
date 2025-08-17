@@ -16,8 +16,8 @@ This is just a repo containing a demo website to run an example of the tool. Clo
 
 This demo running in a browser:
 
-![Screenshot](https://github.com/nvelop/LogicalExpressionBuilder/blob/main/screenshot.jpg?raw=true)
+![Screenshot](https://github.com/nvelop/LogicalExpressionBuilder/main/screenshot.jpg)
 
 Another styling option:
 
-![Screenshot](https://github.com/nvelop/LogicalExpressionBuilder/blob/main/screenshot2.jpg?raw=true)
+![Screenshot](https://github.com/nvelop/LogicalExpressionBuilder/main/screenshot2.jpg)
